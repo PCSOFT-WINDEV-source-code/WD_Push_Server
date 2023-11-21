@@ -1,0 +1,489 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : COL_ManageIdentifiers_Push
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x11f944210061bb81
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  internal_properties : CAAAAAgAAADaio0MNwHhv8YOBTfL2hnAMovgoSzJ7gkWr1Zjyx1FUlbBvs+LdOZNAMrxF0dTm8s4ddndDZkcMVg7vMcgZahAxB+dMtZiWe7cNsi4Eh/4FiC5KhHhqHyqlnxtOB8FnzofOuVByg8CySM1Jn0=
+  type_code : 31
+  p_codes :
+   -
+     code : |1+
+      
+      // Type of Push service
+      constant
+      	typeiOSServiceProduction = 1
+      	typeiOSServiceDevelopment = 2
+      	typeAndroidService = 3
+      end
+     type : 720896
+  procedures :
+   -
+     name : AddIOSIdentifier
+     procedure_id : 1295141276376808321
+     type_code : 15
+     code : |1+
+      
+      // Summary: Adds an identifier (token) of the iOS Apple notification service (APN)
+      // Syntax:
+      //[ <Result> = ] AddIOSIdentifier (<bufIdentifier> is buffer, <bProduction> is boolean, <sCustomInfo> is string)
+      //
+      // Parameters:
+      //	bufIdentifier (buffer): token to add
+      //	bProduction (boolean): True if the token is a token for the production server, False if it is a token for the development server
+      //	sCustomInfo (ANSI string): user information
+      
+      // Return value:
+      // 	boolean: True if the addition was performed, False otherwise
+      procedure AddIOSIdentifier(bufIdentifier is buffer, bProduction is boolean, sCustomInfo is string) : boolean 
+      bSuccess is boolean
+      if bProduction then
+      	bSuccess = __AddIdentifier(bufIdentifier,sCustomInfo,typeiOSServiceProduction)
+      else
+      	bSuccess = __AddIdentifier(bufIdentifier,sCustomInfo,typeiOSServiceDevelopment)
+      end
+      
+      return bSuccess
+      
+      
+     type : 458752
+   -
+     name : AddAndroidIdentifier
+     procedure_id : 1295141276376873857
+     type_code : 15
+     code : |1+
+      
+      // Summary: Adds an identifier (token) of the Android notification service  (GCM)
+      // Syntax:
+      //[ <Result> = ] AddAndroidIdentifier (<bufIdentifier> is buffer, <sCustomInfo> is string)
+      //
+      // Parameters:
+      //	bufIdentifier (buffer): token to add
+      //	sCustomInfo (ANSI string): user information
+      
+      // Return value:
+      // 	boolean: True if the addition was performed, False otherwise
+      procedure AddAndroidIdentifier(bufIdentifier is buffer, sCustomInfo is string) : boolean 
+      
+      return __AddIdentifier(bufIdentifier,sCustomInfo,typeAndroidService)
+     type : 458752
+   -
+     name : __AddIdentifier
+     internal_properties : CAAAAAgAAAB2wbKEnZKtoXQEGxGGWJPaPQLWAr71iRaGeOiZ0VZK35B1O0LpQGQB7pZySFb0QapmXj57toQZ83ZyOda0YoQlhc7QvEBEO8aEDO5hqWal1nsA4N5yJ7RD0b5pUcwpSSzYP9BkmUoWwfU4E3wNBVh5nvT61yF6fRL1+nmtoooyK+cJMZPQ40o3LYL0FClVILv5QNuSjQY=
+     procedure_id : 1295141276376939393
+     type_code : 15
+     code : |1-
+      
+      // Summary: Adds an identifier into the database
+      // Syntax:
+      //[ <Result> = ] __AddIdentifier (<bufIdentifier> is buffer, <sCustomInfo> is string, <nServiceType> is int)
+      //
+      // Parameters:
+      //	bufIdentifier (buffer): The identifier
+      //	sCustomInfo (ANSI string): Custom character string for the identifier
+      //	nServiceType (int): Type of service
+      
+      procedure private __AddIdentifier(bufIdentifier is buffer, sCustomInfo is string, nServiceType is int) : boolean
+      
+      if Length(bufIdentifier) = 0 then
+      	return False
+      end
+      HReadSeekFirst(PushIdentifier,ServiceIdentifierServiceType,[bufIdentifier, nServiceType])
+      if HFound(PushIdentifier) then
+      	// duplicate
+      	return False
+      end
+      
+      PushIdentifier.ServiceIdentifier = bufIdentifier
+      PushIdentifier.CustomInfo = sCustomInfo
+      PushIdentifier.ServiceType = nServiceType
+      
+      // Add into the database
+      if not HAdd(PushIdentifier) then
+      	ExceptionThrow(1,"Failure adding the identifier")
+      end
+      
+      return True
+     type : 458752
+   -
+     name : ListIOSIdentifiers
+     procedure_id : 1295141276377004929
+     type_code : 15
+     code : |1+
+      
+      // Summary: Lists the iOS identifiers
+      // Syntax:
+      //[ <Result> = ] ListIOSIdentifiers (<bProduction> is boolean)
+      //
+      // Parameters:
+      //	bProduction (boolean): True if the token is a token for the production server, False if it is a token for the development server
+      
+      // Return value:
+      // 	array: List of iOS identifiers
+      procedure ListIOSIdentifiers(bProduction is boolean) : array of buffer 
+      if bProduction then
+      	return __ListIdentifiers(typeiOSServiceProduction)
+      else
+      	return __ListIdentifiers(typeiOSServiceDevelopment)	
+      end
+      
+      
+      
+     type : 458752
+   -
+     name : ListAndroidIdentifiers
+     procedure_id : 1295141276377070465
+     type_code : 15
+     code : |1+
+      
+      // Summary: Lists the Android identifiers
+      // Syntax:
+      //[ <Result> = ] ListAndroidIdentifiers ()
+      //
+      // Parameters:
+      //	None
+      
+      // Return value:
+      // 	array: List of Android identifiers
+      procedure ListAndroidIdentifiers() : array of Buffer 
+      return __ListIdentifiers(typeAndroidService)
+     type : 458752
+   -
+     name : __ListIdentifiers
+     procedure_id : 1295141276377136001
+     type_code : 15
+     code : |1+
+      
+      // Summary: Lists the identifiers
+      // Syntax:
+      //[ <Result> = ] __ListIdentifiers (<nServiceType> is int)
+      //
+      // Parameters:
+      //	nServiceType (int): Type of Push service
+      
+      // Return value:
+      // 	array: List of service identifiers
+      procedure private __ListIdentifiers(nServiceType is int) : array of Buffer
+      
+      // Local variables
+      arrBack is array of buffer
+      bufCurrent is buffer
+      
+      // Browse filtered records
+      for each PushIdentifier where ServiceType = nServiceType
+      	bufCurrent = PushIdentifier.ServiceIdentifier
+      	// Add the identifier into the array
+      	Add(arrBack,bufCurrent)
+      end
+      
+      return arrBack
+     type : 458752
+   -
+     name : DeleteAllIdentifiers
+     procedure_id : 1295141276377201537
+     type_code : 15
+     code : |1+
+      
+      // Summary: Deletes all identifiers
+      //
+      procedure DeleteAllIdentifiers() 
+      
+      HDeleteAll(PushIdentifier)
+     type : 458752
+   -
+     name : __DeleteIdentifiers
+     procedure_id : 1295141276377267073
+     type_code : 15
+     code : |1+
+      
+      // Summary: Deletes identifiers
+      // Syntax:
+      //__DeleteIdentifiers (<arrIdentifiersToDelete> is array (buffer), <nType> is int)
+      //
+      // Parameters:
+      //	arrIdentifiersToDelete (array (buffer)): Array of identifiers to delete from the database
+      //	nType (int): Type of identifier
+      
+      procedure private __DeleteIdentifiers(arrIdentifiersToDelete is array of buffer, nType is int) 
+      
+      for each bufIdentifier of arrIdentifiersToDelete
+      	HExecuteQuery(QRY_IdentifierDeletion,hQueryDefault,bufIdentifier,nType)
+      end
+      
+      
+     type : 458752
+   -
+     name : DeleteIOSIdentifiers
+     procedure_id : 1295141276377332609
+     type_code : 15
+     code : |1+
+      
+      // Summary: Deletes iOS identifiers
+      // Syntax:
+      //DeleteIOSIdentifiers (<arrIdentifiersToDelete> is array (buffer), <bProduction> is boolean)
+      //
+      // Parameters:
+      //	arrIdentifiersToDelete (array (buffer)): Array of identifiers to delete from the database
+      //	bProduction (boolean): True if in production server
+      
+      procedure DeleteIOSIdentifiers(arrIdentifiersToDelete is array of buffer, bProduction is boolean) 
+      
+      if bProduction then
+      	__DeleteIdentifiers(arrIdentifiersToDelete,typeiOSServiceProduction)
+      else
+      	__DeleteIdentifiers(arrIdentifiersToDelete,typeiOSServiceDevelopment)
+      end
+      	
+      
+     type : 458752
+   -
+     name : DeleteAndroidIdentifiers
+     procedure_id : 1295141276377398145
+     type_code : 15
+     code : |1+
+      // Summary: Deletes Android identifiers
+      // Syntax:
+      //DeleteAndroidIdentifiers (<arrIdentifiersToDelete> is array (buffer))
+      //
+      // Parameters:
+      //	arrIdentifiersToDelete (array (buffer)): Array of identifiers to delete from the database
+      // Example:
+      // Indicate an example.
+      // 
+      // Return value:
+      procedure DeleteAndroidIdentifiers(arrIdentifiersToDelete is array of buffer) 
+      
+      __DeleteIdentifiers(arrIdentifiersToDelete,typeAndroidService)
+      
+     type : 458752
+   -
+     name : SendAndroid
+     internal_properties : CAAAAAgAAADj5IfJhSzS2MVP1mgq4zr/fB+GuusGrvA46HXlGOv0hhQPTjgz09FSJbngmsq8Xea4xET8mUliUzd5Fo0JoRPZmrucg08g8ckz1574GYINR9BJgxDXeNzyRzbtYptgVfPQXBSSYFvKslsi3+vSQDDi2vNgH7xfb8UrNHmoj7HGHnCYlSa0ygeuMXOo2XdbWrNtPSxIJM47znpepzMSReF+kCW/4OUtfUewKK9W2IL7mJsLGjAE
+     procedure_id : 1295141276377463681
+     type_code : 15
+     code : |1+
+      
+      // Summary: Sends a PUSH notification to the Android subscribers
+      //
+      procedure SendAndroid(sMessage is string, sContent is string, sTitle is string, sDropDownText is string, bVibration is boolean, ...
+      bLED is boolean, bDeletable is boolean, bActiveApplication is boolean) : string 
+      
+      // Variables
+      arrIdentifiersToSend 		is array of buffers
+      arrIdentifiersToSendTemp 	is array of buffers
+      ResponseList 					is array of Buffer
+      bufIdentifier					is buffer
+      arrInvalidTokens 				is array of buffer
+      nNbInvalidTokens				is int
+      
+      if gsAndroidAPIKey = "" then
+      	return "Enter an API Google key"
+      end
+      
+      // Retrieve the identifiers
+      ResponseList = ListAndroidIdentifiers()
+      
+      if ResponseList.Count > 0 then
+      	// Add identifiers into a table
+      	for i = 1 _to_ ResponseList.Count
+      		bufIdentifier = ResponseList[i]
+      		ArrayAdd(arrIdentifiersToSend,bufIdentifier)
+      	end
+      	
+      	// Manage the fact that the PUSH notifications can have up to 1000 recipients only
+      	// If there are more recipients, several messages must be sent.
+      	for i = 0 _to_ (arrIdentifiersToSend.Count / 1000)
+      		nStart is int = i * 1000 + 1
+      		nEnd is int = (i + 1) * 1000
+      		
+      		if nEnd > arrIdentifiersToSend.Count then
+      			nEnd = arrIdentifiersToSend.Count
+      		end
+      		
+      		// Take the requested identifiers
+      		ArrayCopy(arrIdentifiersToSend,arrIdentifiersToSendTemp,nStart,nEnd - nStart + 1)
+      		
+      		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      		// Send the notification
+      		
+      		myNotif is Notification
+      		
+      		myNotif.Message = sMessage
+      		myNotif.Content = sContent
+      		
+      		////////////////////////////////////////////////////////////////
+      		// Android
+      		
+      		// Title
+      		myNotif.Title = sTitle
+      		
+      		// Android sound
+      		myNotif.Sound = "sound_notif.mp3"
+      		
+      		// Icon
+      		myNotif.Icon = "" // include notification icon here
+      		
+      		// Group of notifications
+      		myNotif..Group = "Push"
+      		
+      		// Drop-down text
+      		myNotif.DropDownText = sDropDownText
+      		
+      		// Options
+      		myNotif.Vibration = bVibration
+      		myNotif.DisplayLED = bLED
+      		myNotif.Deletable = bDeletable
+      		myNotif.ActivateApplication = bActiveApplication
+      		
+      		if not NotifPushSend(myNotif,arrIdentifiersToSendTemp,gsAndroidAPIKey,arrInvalidTokens,gnTypeAndroidNotification) then
+      			return "Error sending the message" + CR +  ErrorInfo()
+      		else
+      			// Process invalid tokens
+      			if arrInvalidTokens.Count > 0 then
+      				nNbInvalidTokens += arrInvalidTokens.Count
+      				
+      				// Delete invalid tokens
+      				DeleteAndroidIdentifiers(arrInvalidTokens)	
+      			end
+      		end
+      	end
+      	
+      else
+      	return  "No identifier stored on the server." + "No notification sent."
+      end
+      
+      return ""
+     type : 458752
+   -
+     name : SendiOS
+     internal_properties : CAAAAAgAAABKpVYgZLb4MeiYNyGGBHs+uUb+CtZRnUaaHHSBEWqKG8yJCzoplDBJQmo22E746S7q0uaD9ui1ExLOXYZ8LlThmZqojKgo3y4AqJJD61BfBAWK+sx88X6deyhTs+7zQ2pqmbpqwwSoY1eCPd4HB1oHoIacTbvs9wz3/GsnzFwMwdETy0lqRYxpF7Q2vpP3gmDi5Hd2qSI=
+     procedure_id : 1295141276377529217
+     type_code : 15
+     code : |1-
+      
+      // Summary: Sends a PUSH notification to the iOS subscribers
+      //
+      procedure SendiOS(nSendType is int, sMessage is string, sContent is string, sActionText is string, sBadge is string, sTopicID is string) : string 
+      
+      // Variables
+      arrIdentifiersToSend 	is array of buffers
+      arrMyCertif 				is array of Certificate 
+      ResponseList 				is array of buffer
+      
+      if gsiOSCertificate = "" then
+      	return "Enter a certificate"
+      end
+      
+      // Retrieve the identifiers
+      ResponseList = ListIOSIdentifiers(False)
+      
+      // Load the certificate
+      arrMyCertif = CertificateLoad(gsiOSCertificate,gsiOSCertificatePassword)
+      
+      if arrMyCertif.Count = 0 then
+      	// Problem while loading the certificate
+      	return "Error while loading the certificate. Check the path and the certificate password in the webservice."
+      end
+      
+      if ResponseList.Count > 0 then
+      	// Add identifiers into a table
+      	for i = 1 _to_ ResponseList.Count
+      		bufTest is Buffer = ResponseList[i]
+      		ArrayAdd(arrIdentifiersToSend,bufTest)
+      	end
+      	
+      	//	nSendType = //
+      	//		nSendType = typeServiceIOSTest
+      	//	ELSE
+      	//		nSendType = typeServiceIOSRelease
+      	//	END
+      	
+      	myNotif is Notification
+      	
+      	myNotif.Message = sMessage
+      	myNotif.Content = sContent
+      	
+      	////////////////////////////////////////////////////////////////
+      	// iOS
+      	
+      	// iOS sound
+      	myNotif.Sound = "sound_notif.aac"
+      	
+      	// Icon
+      	myNotif.Icon = "" // include notification icon here
+      	
+      	// Title of action button
+      	myNotif.ActionLabel = sActionText
+      	
+      	// Badge for iOS
+      	myNotif.Badge = sBadge
+      	
+      	// Send the notification	
+      	if not NotifPushSend(myNotif,arrIdentifiersToSend,gsiOSCertificate,gsiOSCertificatePassword,sTopicID,nSendType) then
+      		return ErrorInfo((errFullDetails))
+      	end
+      else
+      	return "No identifier stored on the server." + CR + "No notification sent."
+      end
+      return ""
+     type : 458752
+   -
+     name : GetInvalidTokensiOS
+     internal_properties : CAAAAAgAAADe7baQihkWRcO3vIA7kX9a4vxBJjKC53gxKJyv0bpVlj1mHwyf7GOOLUMS3d3C2mkOLO0IE2/TGGk0xthKReKSoNX76tWZLqBk8/DufLaD2oQ/Yo3OUbUsFdZpV3JGPkJBcM76Z0FKDNVJpxbQJYAIn/2r/pgg5FMiN7o61OGFmHzitP0KedrcYhRf42oAZ6DffNC5pj4YXCmUe238XRbUtr84ZvRsubK3C6qh9zynY9AoZ/KhOg==
+     procedure_id : 1295141276377594753
+     type_code : 15
+     code : |1-
+      
+      // Summary: Retrieves the invalid iOS tokens
+      // Procedure that must be called once a day in a Windows scheduled task for example
+      // // Automatic procedure:
+      // The procedure is automatically run, after the project initialization code
+      // 
+      
+      procedure GetInvalidTokensiOS() 
+      
+      // Variables
+      arrInvalidTokens is array of buffers
+      arrInvalidTokensProd is array of buffers
+      arrMyCertif is array of Certificate
+      
+      // Load the certificate
+      arrMyCertif = CertificateLoad(gsiOSCertificate,gsiOSCertificatePassword)
+      
+      // Retrieve tokens
+      arrInvalidTokens = NotifPushListInvalidIdentifiers(arrMyCertif[1],typeServiceIOSTest)
+      arrInvalidTokensProd = NotifPushListInvalidIdentifiers(arrMyCertif[1],typeServiceIOSRelease)
+      
+      // Process invalid tokens
+      if arrInvalidTokens.Count > 0 then
+      	// Delete invalid tokens
+      	DeleteIOSIdentifiers(arrInvalidTokens,False)	
+      end
+      
+      // Process invalid tokens
+      if arrInvalidTokensProd.Count > 0 then
+      	// Delete invalid tokens
+      	DeleteIOSIdentifiers(arrInvalidTokensProd,True)	
+      end
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x1fad60ce002062e8
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ
+associated_test :
+ name : TEST_COL_GestionIdentifiants_Push.wxt
